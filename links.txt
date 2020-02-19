@@ -1,0 +1,10 @@
+https://www.geeksforgeeks.org/reading-and-writing-json-to-a-file-in-python/
+
+https://stackabuse.com/reading-and-writing-json-to-a-file-in-python/
+
+https://thepythonguru.com/reading-and-writing-json-in-python/
+
+## tips
+
+run file with command: CTRL + SHIFT + F10
+
