@@ -477,6 +477,7 @@ class Row(object):
     showTitle = attr.ib(default=None)
     title = attr.ib(default=None)
     repeat = attr.ib(default=None)
+    type = attr.ib(default="row")
 
     def _iter_panels(self):
         return iter(self.panels)
@@ -500,6 +501,7 @@ class Row(object):
             'showTitle': showTitle,
             'title': title,
             'repeat': self.repeat,
+            'type': self.type
         }
 
 

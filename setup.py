@@ -10,7 +10,7 @@ README = local_file('README.rst')
 
 setup(
     name="src",
-    version='0.0.1',
+    version='0.0.4.2',
     description='Library for building grafana dashboards',
     long_description=open(README).read(),
     url='https://github.com/filipve1994/grafanabuilddashboardswithpython',
@@ -30,6 +30,7 @@ setup(
     ],
     install_requires=[
         'attrs==19.2',
+        'python-dotenv==0.11.0',
     ],
     extras_require={
         'dev': [
@@ -41,6 +42,7 @@ setup(
         'console_scripts': [
             'generate-dashboard=src._gen:generate_dashboard_script',
             'generate-dashboards=src._gen:generate_dashboards_script',
+            'generate-dashboard-filip=src._gen:generate_dashboard_filip_script',
         ],
     },
 )

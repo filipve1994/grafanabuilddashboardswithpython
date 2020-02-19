@@ -1,5 +1,14 @@
 from src.core import *
 from src.prometheus import *
+import src._gen
+
+print("dashboardglobal: ", src._gen.dashboardvar)
+print("environmentglobal: ", src._gen.environmentvar)
+
+environment = src._gen.environmentvar
+instance = src._gen.instancevar
+# job = src._gen.job
+job = 'upmviziworks-backend-application'
 
 g1 = Graph(
     title="Frontend QPS",
@@ -69,13 +78,6 @@ s2 = SingleStat(
     editable=True,
     # error=False,
     format="s",
-    # gauge={
-    #     #     "maxValue": 100,
-    #     #     "minValue": 0,
-    #     #     "show": False,
-    #     #     "thresholdLabels": False,
-    #     #     "thresholdMarkers": True
-    #     # },
     gauge=Gauge(
         maxValue=100,
         minValue=0,
@@ -113,23 +115,17 @@ s2 = SingleStat(
             "to": "null"
         }
     ],
-    # sparkline={
-    #     "fillColor": "rgba(31, 118, 189, 0.18)",
-    #     "full": False,
-    #     "lineColor": "rgb(31, 120, 193)",
-    #     "show": False
-    # },
+    repeat=None,
+    span=4,
     sparkline=SparkLine(
-        # fillColor="rgba(31, 118, 189, 0.18)",
         fillColor=RGBA(31, 118, 189, 0.18),
         full=False,
-        # lineColor="rgb(31, 120, 193)",
         lineColor=RGB(31, 120, 193),
         show=False
     ),
     targets=[
         Target(
-            expr='process_uptime_seconds{instance="arte2-cp11-lp.msnet.railb.be:15881", job="upmviziworks-backend-application"}',
+            expr='process_uptime_seconds{instance="' + instance + '", job="' + job + '"}',
             legendFormat="",
             refId='A',
             step=14400,
@@ -152,12 +148,24 @@ s2 = SingleStat(
 
 dashboard = Dashboard(
     title="HTTP dashboard",
+    refresh="5m",
+    tags=["python generated dashboard", "dashboard", "spring boot"],
+    time=Time('now-15m', 'now'),
+    timezone="browser",
     rows=[
         Row(
-            title="Row title test",
+            title="Quick Facts",
+            type="row",
             panels=[
-            g1,
-            s2
-        ])
+                g1,
+                s2
+            ]),
+        Row(
+            title="Quick Facts2",
+            type="row",
+            panels=[
+                g1,
+                s2
+            ])
     ]
 ).auto_panel_ids()

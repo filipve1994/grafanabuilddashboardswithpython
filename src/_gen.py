@@ -4,8 +4,16 @@ import argparse
 import json
 import os
 import sys
+from dotenv import load_dotenv, find_dotenv
+from pathlib import Path  # python3 only
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path, verbose=True)
 
 DASHBOARD_SUFFIX = '.dashboard.py'
+
+dashboardvar = ''
+environmentvar = 'test'
+instancevar = ''
 
 
 class DashboardError(Exception):
@@ -18,6 +26,37 @@ def load_dashboard(path):
         ``dashboard``.
     :return: A ``Dashboard``
     """
+    if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dashboard", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    else:
+        import importlib
+        module = importlib.load_source("dashboard", path)
+    marker = object()
+    dashboard = getattr(module, 'dashboard', marker)
+    if dashboard is marker:
+        raise DashboardError(
+            "Dashboard definition {} does not define 'dashboard'".format(path))
+    return dashboard
+
+
+def load_dashboard_env(path, environment, instance):
+    """Load a ``Dashboard`` from a Python definition.
+    :param environment:
+    :param str path: Path to a *.dashboard.py file that defines a variable,
+        ``dashboard``.
+    :return: A ``Dashboard``
+    """
+
+    global environmentvar
+    environmentvar = environment
+    global dashboardvar
+    dashboardvar = path
+    global instancevar
+    instancevar = instance
+
     if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
         import importlib.util
         spec = importlib.util.spec_from_file_location("dashboard", path)
@@ -99,12 +138,17 @@ def generate_dashboard(args):
         help='Where to write the dashboard JSON'
     )
     parser.add_argument(
+        '--environment', metavar='ENVIRONMENT', type=str,
+        help='What is the environment that will be used for this dashboard',
+    )
+    parser.add_argument(
         'dashboard', metavar='DASHBOARD', type=os.path.abspath,
         help='Path to dashboard definition',
     )
     opts = parser.parse_args(args)
     try:
-        dashboard = load_dashboard(opts.dashboard)
+        dashboard = load_dashboard_env(opts.dashboard, opts.environment)
+        # dashboard = load_dashboard(opts.dashboard)
         if not opts.output:
             print_dashboard(dashboard)
         else:
@@ -113,6 +157,46 @@ def generate_dashboard(args):
     except DashboardError as e:
         sys.stderr.write('ERROR: {}\n'.format(e))
         return 1
+    return 0
+
+
+def generate_dashboard_filip(args):
+    input_environments = os.getenv("environments")
+    input_instances = os.getenv("instances")
+    input_filenames = os.getenv("filenames")
+
+    environments = input_environments.split(",")
+    instances = input_instances.split(",")
+    filenames = input_filenames.split(",")
+
+    parser = argparse.ArgumentParser(prog='generate-dashboard-filip')
+    # parser.add_argument(
+    #     '--output', '-o', type=os.path.abspath,
+    #     help='Where to write the dashboard JSON'
+    # )
+    # parser.add_argument(
+    #     '--environment', metavar='ENVIRONMENT', type=str,
+    #     help='What is the environment that will be used for this dashboard',
+    # )
+    parser.add_argument(
+        'dashboard', metavar='DASHBOARD', type=os.path.abspath,
+        help='Path to dashboard definition',
+    )
+    opts = parser.parse_args(args)
+
+    for i in range(3):
+        opts.output = filenames[i]
+        print("opts.output: ", opts.output)
+        try:
+            dashboard = load_dashboard_env(opts.dashboard, environments[i], instances[i])
+            if not opts.output:
+                print_dashboard(dashboard)
+            else:
+                with open(opts.output, 'w') as output:
+                    write_dashboard(dashboard, output)
+        except DashboardError as e:
+            sys.stderr.write('ERROR: {}\n'.format(e))
+            return 1
     return 0
 
 
@@ -128,3 +212,7 @@ def generate_dashboards_script():
 def generate_dashboard_script():
     """Entry point for generate-dasboard."""
     run_script(generate_dashboard)
+
+
+def generate_dashboard_filip_script():
+    run_script(generate_dashboard_filip)
