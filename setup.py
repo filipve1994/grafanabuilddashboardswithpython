@@ -29,7 +29,7 @@ setup(
         'Topic :: System :: Monitoring',
     ],
     install_requires=[
-        'attrs==19.2',
+        'attrs==25.4.0',
         'python-dotenv==0.11.0',
     ],
     extras_require={
