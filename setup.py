@@ -30,7 +30,7 @@ setup(
     ],
     install_requires=[
         'attrs==19.2',
-        'python-dotenv==0.11.0',
+        'python-dotenv==1.2.2',
     ],
     extras_require={
         'dev': [
